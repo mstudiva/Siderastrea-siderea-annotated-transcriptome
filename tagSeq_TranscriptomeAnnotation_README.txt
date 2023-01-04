@@ -197,6 +197,7 @@ cp ~/bin/kog_classes.txt .
 
 #  KOG classes (single-letter):
 awk -F "\t" 'BEGIN {OFS="\t" }{print $1,$7 }' out.emapper.annotations | grep -Ev "[,#S]" >Ssiderea_iso2kogClass1.tab
+awk -F "\t" 'BEGIN {OFS="\t" }{print $1,$7 }' out.emapper.annotations | grep -Ev "\tNA" >Ssiderea_iso2kogClass1.tab
 # converting single-letter KOG classes to text understood by KOGMWU package (must have kog_classes.txt file in the same dir):
 awk 'BEGIN {FS=OFS="\t"} NR==FNR {a[$1] = $2;next} {print $1,a[$2]}' kog_classes.txt Ssiderea_iso2kogClass1.tab > Ssiderea_iso2kogClass.tab
 
@@ -216,7 +217,7 @@ https://www.genome.jp/kaas-bin/kaas_main?mode=user&id=1672798357&key=03Vu7h_d # 
 https://www.genome.jp/kaas-bin/kaas_main?mode=user&id=1672795982&key=bvlSdyIf # Radice
 
 # Once it is done, download to HPC - it is named query.ko by default
-wget https://www.genome.jp/tools/kaas/files/dl/1672795723/query.ko # Davies
+wget https://www.genome.jp/tools/kaas/files/dl/1672798357/query.ko # Davies
 wget https://www.genome.jp/tools/kaas/files/dl/1672795982/query.ko # Radice
 
 # selecting only the lines with non-missing annotation:
