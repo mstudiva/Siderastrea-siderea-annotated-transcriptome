@@ -1,0 +1,11 @@
+Ssiderea.fasta
+-------------------------
+167421 sequences.
+848 average length.
+27924 maximum length.
+201 minimum length.
+N50 = 1490
+142 Mb altogether (142004876 bp).
+0 ambiguous Mb. (0 bp, 0%)
+0 Mb of Ns. (0 bp, 0%)
+-------------------------

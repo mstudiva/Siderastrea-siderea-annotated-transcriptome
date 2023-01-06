@@ -18,8 +18,7 @@
 #------------------------------
 # setup
 
-# To install Bioperl in your bin directory, please follow these instructions:
-cd bin
+# To install Bioperl as a conda environment
 conda create -y -n bioperl perl-bioperl
 
 # getting scripts
@@ -58,7 +57,7 @@ unzip Siderastrea_siderea_transcriptome.zip
 mv Siderastrea_siderea_transcriptome/davies_Ssid.fasta .
 mv davies_Ssid.fasta Ssiderea.fasta
 
-# use the stream editor to find and replace all instances of "comp" with "Cladocopium" in the symbiont transcriptome
+# use the stream editor to find and replace all instances of component designations with the species name
 sed -i 's/comp/Ssiderea/g' Ssiderea.fasta
 
 mkdir radice
@@ -72,9 +71,12 @@ mkdir macknight
 
 # MacKnight (September 2022)
 # from https://www.science.org/doi/full/10.1126/sciadv.abo6153
-mv Ssid_comb_longest.fa Ssiderea.fasta
 
-sed -i 's/TRINITY_DN/Ssiderea_/g' Ssiderea.fasta
+# uses fast-x toolkit to wrap each line to 60 characters
+module load fastx-toolkit-0.0.14-gcc-8.3.0-ombppo2
+srun fasta_formatter -i Ssid_comb_longest.fa -w 60 -o Ssiderea.fasta
+
+sed -i 's/TRINITY_DN/Ssiderea/g' Ssiderea.fasta
 
 # transcriptome statistics
 conda activate bioperl
@@ -135,7 +137,7 @@ echo "makeblastdb -in uniprot_sprot.fasta -dbtype prot" >mdb
 launcher_creator.py -j mdb -n mdb -q shortq7 -t 6:00:00 -e studivanms@gmail.com
 sbatch mdb.slurm
 
-# splitting the transcriptome into 100 chunks
+# splitting the transcriptome into 100 chunks, or however many is needed to keep the number of seqs per chunk under 1000
 splitFasta.pl Ssiderea.fasta 100
 
 # blasting all 100 chunks to uniprot in parallel, 4 cores per chunk
@@ -151,7 +153,7 @@ grep "Query= " subset*.br | wc -l
 cat subset*br > myblast.br
 mv subset* ~/annotate/backup/
 
-# for trinity-assembled transcriptomes: annotating with "Cladocopium" or "Ssiderea" depending on if component is from symbiont or host (=component)
+# for trinity-assembled transcriptomes: annotating with isogroups
 grep ">" Ssiderea.fasta | perl -pe 's/>Ssiderea(\d+)(\S+)\s.+/Ssiderea$1$2\tSsiderea$1/'>Ssiderea_seq2iso.tab
 cat Ssiderea.fasta | perl -pe 's/>Ssiderea(\d+)(\S+).+/>Ssiderea$1$2 gene=Ssiderea$1/'>Ssiderea_iso.fasta
 
@@ -178,10 +180,12 @@ scp mstudiva@koko-login.hpc.fau.edu:~/path/to/HPC/directory/*_out_PRO.fas .
 # copy link to job ID status and output file, paste it below instead of current link:
 # Ssid (Davies) status: go on web to http://eggnog-mapper.embl.de/job_status?jobname=MM_px5am572
 # Ssid (Radice) status: go on web to http://eggnog-mapper.embl.de/job_status?jobname=MM_4ernzdri
+# Ssid (MacKnight) status: go on web to http://eggnog-mapper.embl.de/job_status?jobname=MM_27mj0a9h
 
 # once it is done, download results to HPC:
 wget http://eggnog-mapper.embl.de/MM_px5am572/out.emapper.annotations # Davies
 wget http://eggnog-mapper.embl.de/MM_4ernzdri/out.emapper.annotations # Radice
+wget http://eggnog-mapper.embl.de/MM_27mj0a9h/out.emapper.annotations # MacKnight
 
 # GO:
 awk -F "\t" 'BEGIN {OFS="\t" }{print $1,$10 }' out.emapper.annotations | grep GO | perl -pe 's/,/;/g' >Ssiderea_iso2go.tab
@@ -196,7 +200,7 @@ awk -F "\t" 'BEGIN {OFS="\t" }{print $1,$8 }' out.emapper.annotations | grep -Ev
 cp ~/bin/kog_classes.txt .
 
 #  KOG classes (single-letter):
-awk -F "\t" 'BEGIN {OFS="\t" }{print $1,$7 }' out.emapper.annotations | grep -Ev "[,#S]" >Ssiderea_iso2kogClass1.tab
+# this doesn't appear to be working, but the below line works awk -F "\t" 'BEGIN {OFS="\t" }{print $1,$7 }' out.emapper.annotations | grep -Ev "[,#S]" >Ssiderea_iso2kogClass1.tab
 awk -F "\t" 'BEGIN {OFS="\t" }{print $1,$7 }' out.emapper.annotations | grep -Ev "\tNA" >Ssiderea_iso2kogClass1.tab
 # converting single-letter KOG classes to text understood by KOGMWU package (must have kog_classes.txt file in the same dir):
 awk 'BEGIN {FS=OFS="\t"} NR==FNR {a[$1] = $2;next} {print $1,a[$2]}' kog_classes.txt Ssiderea_iso2kogClass1.tab > Ssiderea_iso2kogClass.tab
@@ -215,10 +219,12 @@ scp mstudiva@koko-login.hpc.fau.edu:~/path/to/HPC/directory/*4kegg.fasta .
 # select SBH method, upload nucleotide query
 https://www.genome.jp/kaas-bin/kaas_main?mode=user&id=1672798357&key=03Vu7h_d # Davies
 https://www.genome.jp/kaas-bin/kaas_main?mode=user&id=1672795982&key=bvlSdyIf # Radice
+https://www.genome.jp/kaas-bin/kaas_main?mode=user&id=1672972860&key=WzP97C8U # MacKnight
 
 # Once it is done, download to HPC - it is named query.ko by default
 wget https://www.genome.jp/tools/kaas/files/dl/1672798357/query.ko # Davies
 wget https://www.genome.jp/tools/kaas/files/dl/1672795982/query.ko # Radice
+wget https://www.genome.jp/tools/kaas/files/dl/1672972860/query.ko # MacKnight
 
 # selecting only the lines with non-missing annotation:
 cat query.ko | awk '{if ($2!="") print }' > Ssiderea_iso2kegg.tab
