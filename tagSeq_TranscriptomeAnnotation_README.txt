@@ -1,6 +1,5 @@
-# Transcriptome Annotation, version January 3, 2023
+# Siderastrea siderea/radians Transcriptome Annotation, version January 11, 2023
 # Created by Misha Matz (matz@utexas.edu), modified by Michael Studivan (studivanms@gmail.com) for use on FAU's HPC (KoKo)
-# for use in generating transcriptome annotations for Siderastrea siderea
 
 
 #------------------------------
@@ -78,6 +77,15 @@ srun fasta_formatter -i Ssid_comb_longest.fa -w 60 -o Ssiderea.fasta
 
 sed -i 's/TRINITY_DN/Ssiderea/g' Ssiderea.fasta
 
+mkdir magana
+
+# Avila-Magana (August 2021)
+# from https://datadryad.org/stash/dataset/doi:10.5061/dryad.k3j9kd57b
+gunzip Sid_Host.fna.gz
+mv Sid_Host.fna Sradians.fasta
+
+sed -i 's/TRINITY_DN/Sradians/g' Sradians.fasta
+
 # transcriptome statistics
 conda activate bioperl
 echo "seq_stats.pl Ssiderea.fasta > seqstats_Ssiderea.txt" > seq_stats
@@ -122,6 +130,18 @@ N50 = 1490
 0 Mb of Ns. (0 bp, 0%)
 -------------------------
 
+Sradians.fasta (Avila-Magana)
+-------------------------
+685205 sequences.
+585 average length.
+2459 maximum length.
+201 minimum length.
+N50 = 779
+401.1 Mb altogether (401076233 bp).
+0 ambiguous Mb. (0 bp, 0%)
+0 Mb of Ns. (0 bp, 0%)
+-------------------------
+
 
 #------------------------------
 # uniprot annotations with blast
@@ -133,6 +153,7 @@ wget ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/c
 gunzip uniprot_sprot.fasta.gz &
 
 # indexing the fasta database
+module load blast-plus-2.11.0-gcc-9.2.0-5tzbbls
 echo "makeblastdb -in uniprot_sprot.fasta -dbtype prot" >mdb
 launcher_creator.py -j mdb -n mdb -q shortq7 -t 6:00:00 -e studivanms@gmail.com
 sbatch mdb.slurm
@@ -157,9 +178,13 @@ mv subset* ~/annotate/backup/
 grep ">" Ssiderea.fasta | perl -pe 's/>Ssiderea(\d+)(\S+)\s.+/Ssiderea$1$2\tSsiderea$1/'>Ssiderea_seq2iso.tab
 cat Ssiderea.fasta | perl -pe 's/>Ssiderea(\d+)(\S+).+/>Ssiderea$1$2 gene=Ssiderea$1/'>Ssiderea_iso.fasta
 
+# small tweak needed for Siderastrea radians to work
+grep ">" Sradians.fasta | perl -pe 's/>Sradians(\d+)(\S+).+/Sradians$1$2\tSradians$1/'>Sradians_seq2iso.tab
+
 
 #-------------------------
 # extracting coding sequences and corresponding protein translations:
+conda activate bioperl # if not active already
 echo "perl ~/bin/CDS_extractor_v2.pl Ssiderea_iso.fasta myblast.br allhits bridgegaps" >cds
 launcher_creator.py -j cds -n cds -l cddd -t 6:00:00 -q shortq7 -e studivanms@gmail.com
 sbatch cddd
