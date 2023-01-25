@@ -47,8 +47,6 @@ cd annotate
 #------------------------------
 # getting transcriptomes
 
-# there are multiple versions available, so create separate subdirectories for each
-
 # Davies (November 2017)
 wget https://sites.bu.edu/davieslab/files/2017/11/Siderastrea_siderea_transcriptome.zip
 unzip Siderastrea_siderea_transcriptome.zip
