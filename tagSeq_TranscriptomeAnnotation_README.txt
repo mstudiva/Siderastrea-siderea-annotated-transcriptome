@@ -1,4 +1,4 @@
-# Siderastrea siderea/radians Transcriptome Annotation, version January 24, 2023
+# Siderastrea siderea/radians Transcriptome Annotation, version January 1, 2025
 # Created by Misha Matz (matz@utexas.edu), modified by Michael Studivan (studivanms@gmail.com) for use on FAU's HPC (KoKo)
 
 
@@ -135,7 +135,7 @@ grep ">" Siderastrea.fasta | perl -pe 's/>Siderastrea(\d+)(\S+)\s.+/Siderastrea$
 cat Siderastrea.fasta | perl -pe 's/>Siderastrea(\d+)(\S+).+/>Siderastrea$1$2 gene=Siderastrea$1/'>Siderastrea_iso.fasta
 
 # small tweak needed for Avila-Magana reference to work
-grep ">" Siderastrea.fasta | perl -pe 's/>Siderastrea(\d+)(\S+).+/Siderastrea$1$2\tSiderastrea$1/'>Siderastrea_seq2iso.tab
+grep ">" Siderastrea.fasta | perl -pe 's/>Siderastrea(\d+)(\S+)/Siderastrea$1$2\tSiderastrea$1/'>Siderastrea_seq2iso.tab
 cat Siderastrea.fasta | perl -pe 's/>Siderastrea(\d+)(\S+)/>Siderastrea$1$2 gene=Siderastrea$1/'>Siderastrea_iso.fasta
 
 
